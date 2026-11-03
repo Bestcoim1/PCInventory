@@ -1,0 +1,37 @@
+# =============================================
+# PCInventory - NetBeans Java with Ant (Swing)
+# =============================================
+
+# Ant / NetBeans generated outputs
+/build/
+/dist/
+/nbproject/private/
+*.class
+
+# Local database connection credentials (NEVER commit)
+/config/db.properties
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+*~
+*.swp
+*.swo
+
+# Windows / macOS metadata
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Optional local IDE metadata
+/.idea/
+/.vscode/
+
+# IMPORTANT: Keep the following files in Git:
+#   build.xml, manifest.mf
+#   nbproject/project.xml, nbproject/project.properties
+#   src/**/*.java, src/**/*.form
+#   lib/mysql-connector-j-*.jar
+#   database/*.sql
+#   config/db.properties.example
