@@ -4,6 +4,8 @@
 
 > **Quan trọng:** Tên tiếng Việt không dấu trong tài liệu chỉ là **tên diễn giải**; hệ thống **không đổi tên vật lý các bảng/cột MySQL**.
 
+**Phạm vi kiểm kê thực tế:** 27 bảng · 139 cột · 33 khóa ngoại (đối chiếu từ `schema_v1.sql`).
+
 ## 1. Quy ước sử dụng
 
 - **MySQL và JDBC:** dùng nguyên tên tiếng Anh `snake_case` như DDL; tên Việt hóa dùng trong chú thích, SQL alias `AS` và lời giải thích trên UML.
