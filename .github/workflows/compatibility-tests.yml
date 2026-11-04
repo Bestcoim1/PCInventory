@@ -1,0 +1,33 @@
+name: Compatibility and inventory self-tests
+
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'test/**'
+      - '.github/workflows/compatibility-tests.yml'
+  push:
+    branches: [feature/truong-compatibility]
+
+jobs:
+  compile-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Java 22
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '22'
+      - name: Compile application sources
+        run: |
+          mkdir -p build/classes build/test-classes
+          find src -name '*.java' > /tmp/pcinventory-sources.txt
+          javac --release 22 -encoding UTF-8 -d build/classes @/tmp/pcinventory-sources.txt
+      - name: Compile self-tests
+        run: |
+          find test -name '*.java' > /tmp/pcinventory-tests.txt
+          javac --release 22 -encoding UTF-8 -cp build/classes -d build/test-classes @/tmp/pcinventory-tests.txt
+      - name: Run pure Java self-tests (no MySQL required)
+        run: java -cp build/classes:build/test-classes pcinventory.CompatibilityAndInventorySelfTest
