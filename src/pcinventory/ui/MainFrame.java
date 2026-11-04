@@ -96,7 +96,22 @@ public final class MainFrame extends JFrame {
         menu.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
         for (AppPage page : AppPage.values()) {
-            JButton button = new JButton(page.getTitle());
+            // Windows Look and Feel may paint JButton white despite
+            // setBackground(). Paint the nav surface ourselves to preserve
+            // white text contrast and the selected blue state.
+            JButton button = new JButton(page.getTitle()) {
+                @Override
+                protected void paintComponent(java.awt.Graphics graphics) {
+                    java.awt.Graphics layer = graphics.create();
+                    try {
+                        layer.setColor(getBackground());
+                        layer.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+                    } finally {
+                        layer.dispose();
+                    }
+                    super.paintComponent(graphics);
+                }
+            };
             button.setAlignmentX(LEFT_ALIGNMENT);
             button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 48));
             button.setPreferredSize(new Dimension(210, 48));
@@ -104,8 +119,9 @@ public final class MainFrame extends JFrame {
             button.setFont(new Font("SansSerif", Font.PLAIN, 14));
             button.setForeground(Color.WHITE);
             button.setBackground(NAV_BACKGROUND);
-            button.setOpaque(true);
-            button.setContentAreaFilled(true);
+            button.setOpaque(false);
+            button.setContentAreaFilled(false);
+            button.setBorderPainted(false);
             button.setFocusPainted(false);
             button.setBorder(BorderFactory.createEmptyBorder(10, 14, 10, 10));
             button.addActionListener(e -> showPage(page));
