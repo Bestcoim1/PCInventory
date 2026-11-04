@@ -166,15 +166,11 @@ public final class CompatibilityAndInventorySelfTest {
         check(!COMPAT.validateFinal(noCase).isFinalValid(),
                 "UC43 final cannot accept pending Case");
 
-        check(has(COMPAT.revalidateDependencies(
+        check(COMPAT.revalidateDependencies(
                         replace(base, "case", pcCase(1, 5, 2, 1,
-                                RadiatorSize.MM240, Set.of(120)), 1)
-                        // Add an oversized GPU after Case.
-                        .getErrors().isEmpty()
-                    ? new ValidationResult(List.of(), List.of(), Set.of())
-                    : COMPAT.revalidateDependencies(base),
-                        "IMPOSSIBLE_ISSUE") == false,
-                "No artificial errors for valid Case");
+                                RadiatorSize.MM240, Set.of(120)), 1))
+                        .getErrors().isEmpty(),
+                "UC31 valid Case replacement has no new incompatibility");
         check(has(COMPAT.revalidateDependencies(
                         with(base, line("gpu", gpu(360, 600), 1))),
                         "GPU_TOO_LONG"), "UC31 GPU too long for Case");
