@@ -215,6 +215,44 @@ public final class CompatibilityAndInventorySelfTest {
                     config(line("cpu", cpu(true, true), 1))).isCompatible(),
                 "Draft may be compatible but incomplete");
 
+        // UC28 interaction: preview/confirm always operate on copies.
+        // BuildService (Hung) owns cancellation, price and applyTogether.
+        PCConfiguration currentBeforeMainboardChange = complete();
+        PCConfiguration invalidMainboardProposal = replace(
+                currentBeforeMainboardChange, "mb",
+                board("LGA1700", "DDR5", 64, 4, 2), 1);
+        ValidationResult invalidMainboardResult =
+                COMPAT.revalidateDependencies(invalidMainboardProposal);
+        check(has(invalidMainboardResult, "SOCKET_MISMATCH"),
+                "UC28 preview rejects an incompatible replacement Mainboard");
+        check(((Mainboard) currentBeforeMainboardChange.items().get(1)
+                .component()).getSocket().equals("AM5"),
+                "UC28 rejected preview leaves original Mainboard intact");
+        check(currentBeforeMainboardChange.items().size() == 6,
+                "UC28 cancel/discard cannot mutate original configuration");
+
+        PCConfiguration ramConflictProposal = replace(
+                currentBeforeMainboardChange, "mb",
+                board("AM5", "DDR4", 64, 4, 2), 1);
+        ValidationResult ramConflict =
+                COMPAT.revalidateDependencies(ramConflictProposal);
+        check(has(ramConflict, "RAM_TYPE_MISMATCH") &&
+                        ramConflict.getAffectedTypes().contains(ComponentType.RAM),
+                "UC28 changing Mainboard reports dependent RAM conflict");
+        PCConfiguration adjustedCopy = without(ramConflictProposal, "ram");
+        check(COMPAT.revalidateDependencies(adjustedCopy).getErrors().isEmpty(),
+                "UC28 preview after dropping conflicting RAM has no hard errors");
+        check(currentBeforeMainboardChange.items().size() == 6 &&
+                        currentBeforeMainboardChange.items().stream()
+                            .anyMatch(item -> item.lineId().equals("ram")),
+                "UC28 adjusting preview never silently removes original RAM");
+        check(COMPAT.filterCompatible(
+                    without(currentBeforeMainboardChange, "mb"),
+                    ComponentType.MAINBOARD,
+                    List.of(board("AM5", "DDR5", 64, 4, 2),
+                            board("LGA1700", "DDR5", 64, 4, 2))).size() == 1,
+                "UC28 replacement filtering must omit original Mainboard slot");
+
         InventoryService inventory3 = new InventoryService(ids -> Map.of(12L, 3));
         PCConfiguration twoFanLines = config(
                 line("fan_a", fan(120), 2),
