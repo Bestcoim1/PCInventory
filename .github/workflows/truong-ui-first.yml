@@ -1,0 +1,53 @@
+name: Truong UC UI-first Java checks
+
+on:
+  push:
+    branches:
+      - feature/truong-ui-first
+  pull_request:
+    paths:
+      - 'src/pcinventory/ui/builder/**'
+      - 'test/pcinventory/ui/builder/**'
+      - '.github/workflows/truong-ui-first.yml'
+
+jobs:
+  ui-compile-and-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '22'
+      - name: Compile entire current source tree
+        run: |
+          mkdir -p build/ci-classes build/ci-tests
+          find src -name '*.java' -print > /tmp/pc-sources.txt
+          javac --release 22 -encoding UTF-8 -d build/ci-classes @/tmp/pc-sources.txt
+      - name: Compile UI self-test
+        run: |
+          javac --release 22 -encoding UTF-8 \
+            -cp build/ci-classes -d build/ci-tests \
+            test/pcinventory/ui/builder/BuilderUiFirstSelfTest.java
+      - name: Run headless Swing and demo scenario tests
+        run: |
+          java -Djava.awt.headless=true \
+            -cp build/ci-classes:build/ci-tests \
+            pcinventory.ui.builder.BuilderUiFirstSelfTest
+
+      - name: Generate real Swing screenshots for all UC scenarios
+        run: |
+          if ! command -v xvfb-run >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y xvfb
+          fi
+          mkdir -p ui-screenshots
+          javac --release 22 -encoding UTF-8 -cp build/ci-classes -d build/ci-tests test/pcinventory/ui/builder/BuilderScreenshotGenerator.java
+          xvfb-run -a java -cp build/ci-classes:build/ci-tests pcinventory.ui.builder.BuilderScreenshotGenerator ui-screenshots
+      - name: Upload screenshots for use-case documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: PCInventory-Truong-UC-UI-screenshots
+          path: ui-screenshots/*.png
+          if-no-files-found: error
