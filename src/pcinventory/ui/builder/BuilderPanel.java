@@ -356,6 +356,8 @@ public final class BuilderPanel extends JPanel {
         inStockOnly.setSelected(false);
         currentKind=scenario.focus;
         selectKind(scenario.focus);
+        if(scenario==Scenario.UC30)quantityBox.setValue(2);
+        refreshAll();
         bottomStatus.setText("Đã tải tình huống "+scenario.name()+
                 " — DEMO; dữ liệu MySQL không thay đổi.");
     }
