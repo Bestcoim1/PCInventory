@@ -139,6 +139,7 @@ public final class BuilderPanel extends JPanel {
             Scenario scenario=(Scenario)scenarioBox.getSelectedItem();
             if(scenario!=null)loadScenario(scenario);
         });
+        scenarioBox.setSelectedItem(Scenario.VALID);
         loadScenario(Scenario.VALID);
     }
 
@@ -343,6 +344,11 @@ public final class BuilderPanel extends JPanel {
         bottom.add(actions,BorderLayout.SOUTH);
         p.add(bottom,BorderLayout.SOUTH);
         return p;
+    }
+
+    /** Used by the team's screenshot test runner; also available to QA tools. */
+    public void showDemoScenario(Scenario scenario) {
+        scenarioBox.setSelectedItem(scenario);
     }
 
     private void loadScenario(Scenario scenario){
